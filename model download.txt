@@ -1,0 +1,11 @@
+https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
+🔹 Option 1: Hugging Face (Official + Trusted Source)
+Go to this Hugging Face repo:
+🔗 TheBloke/LLaMA-2-7B-Chat-GGUF
+
+You'll see a list of .gguf files. Look for:
+llama-2-7b-chat.Q4_K_M.gguf
+
+Click the file name and then click “Download”.
+
+📁 File size: ~3.7 GB
