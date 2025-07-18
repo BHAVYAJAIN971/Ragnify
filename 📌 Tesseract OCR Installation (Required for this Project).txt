@@ -1,0 +1,25 @@
+📌 Tesseract OCR Installation (Required for this Project)
+
+This project uses Tesseract OCR to extract text from images.
+
+🔧 To run the OCR functionality, you must install Tesseract on your system.
+
+🔽 Download for Windows:
+Go to: https://github.com/UB-Mannheim/tesseract/wiki
+
+1. Download the latest .exe (e.g., tesseract-ocr-w64-setup-v5.3.x.exe)
+2. During installation:
+   ✅ Check “Add Tesseract to the system PATH”
+   ✅ Optionally install additional language packs (e.g., Hindi)
+
+🧪 After installation, open CMD or PowerShell and check:
+> tesseract -v
+
+If installed correctly, it will show the version number.
+
+📂 Default install path:
+C:\Program Files\Tesseract-OCR\tesseract.exe
+
+🧠 In the code, the path to Tesseract is set as:
+```python
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
