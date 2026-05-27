@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: ragnify-bankrag
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # Set this manually in the Render dashboard
+      - key: DATA_DIR
+        value: /data/indexes
+      - key: UPLOAD_DIR
+        value: /data/uploads
+    disk:
+      name: ragnify-persistent-data
+      mountPath: /data
+      sizeGB: 1

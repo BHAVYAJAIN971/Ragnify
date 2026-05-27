@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ragnify — AI-powered smart document intelligence. Upload PDFs, Word docs, and images to get instant, accurate answers powered by Gemini and FAISS vector search." />
+  <meta name="keywords" content="document, RAG, Ragnify, AI, PDF, document intelligence, Gemini, FAISS" />
+  <title>Ragnify — Smart Document Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- Animated background -->
+  <div class="bg-mesh" aria-hidden="true">
+    <div class="mesh-orb mesh-orb-1"></div>
+    <div class="mesh-orb mesh-orb-2"></div>
+    <div class="mesh-orb mesh-orb-3"></div>
+  </div>
+
+  <!-- App Shell -->
+  <div class="app-shell" id="appShell">
+
+    <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar" role="complementary" aria-label="Document Library">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="10" fill="url(#logo-grad)"/>
+              <path d="M8 28L20 12L32 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="20" cy="22" r="3" fill="white"/>
+              <defs>
+                <linearGradient id="logo-grad" x1="0" y1="0" x2="40" y2="40">
+                  <stop offset="0%" stop-color="#1a56db"/>
+                  <stop offset="100%" stop-color="#0e4bbd"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">Ragnify</span>
+            <span class="logo-tagline">Smart Document Intelligence</span>
+          </div>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-section">
+        <div class="upload-zone" id="uploadZone" role="button" tabindex="0"
+             aria-label="Upload document — click or drag and drop">
+          <div class="upload-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="22" fill="rgba(26,86,219,0.12)" stroke="rgba(26,86,219,0.4)" stroke-width="1.5"/>
+              <path d="M24 32V20M24 20L19 25M24 20L29 25" stroke="#1a56db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 34h16" stroke="#1a56db" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="upload-title">Upload Document</p>
+          <p class="upload-subtitle">PDF, DOCX, JPG, PNG, PPTX</p>
+          <p class="upload-hint">Drag & drop or click to browse</p>
+          <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,.bmp,.tiff,.pptx,.ppt"
+                 style="display:none" aria-label="File input" />
+        </div>
+        <div class="upload-progress" id="uploadProgress" style="display:none">
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <p class="progress-status" id="progressStatus">Processing...</p>
+        </div>
+      </div>
+
+      <!-- Document Library -->
+      <div class="doc-library">
+        <div class="library-header">
+          <h2 class="library-title">Documents</h2>
+          <span class="library-count" id="docCount">0</span>
+        </div>
+        <div class="doc-list" id="docList" role="list" aria-label="Uploaded documents">
+          <div class="doc-list-empty" id="docListEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <p>No documents yet</p>
+            <span>Upload a document to begin</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="status-badge">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">Connecting...</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <div class="model-badge">Gemini · FAISS</div>
+          <button class="settings-btn" id="settingsBtn" title="API Settings" aria-label="Open API key settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0"/>
+              <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal" style="display:none" role="dialog" aria-label="API Key Settings" aria-modal="true">
+      <div class="settings-card">
+        <div class="settings-header">
+          <h3>⚙️ API Key Settings</h3>
+          <button class="settings-close" id="settingsClose" aria-label="Close settings">×</button>
+        </div>
+        <div class="settings-body">
+          <div class="settings-current" id="settingsCurrent">
+            <span class="settings-label">Current Key:</span>
+            <span class="settings-key-display" id="currentKeyDisplay">Loading...</span>
+          </div>
+          <div class="settings-alert" id="settingsAlert" style="display:none"></div>
+          <div class="settings-input-group">
+            <label for="newApiKey" class="settings-label">Gemini API Key (AIzaSy...)</label>
+            <input type="password" id="newApiKey" placeholder="AIzaSy..." class="settings-input"
+                   autocomplete="off" spellcheck="false" />
+            <p class="settings-hint">Your key is stored locally in a .env file. Gemini keys start with <code style="color:var(--blue-300)">AIza</code>. Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--blue-400)">aistudio.google.com</a></p>
+          </div>
+          <div class="settings-actions">
+            <button class="settings-save" id="settingsSave">Update Key</button>
+            <button class="settings-cancel" id="settingsCancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main Panel ───────────────────────────────────────────────────── -->
+    <main class="main-panel" id="mainPanel" role="main">
+
+      <!-- Welcome Screen -->
+      <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-content">
+          <div class="welcome-badge">
+            <span class="badge-dot"></span>
+            AI-Powered Document Intelligence
+          </div>
+          <h1 class="welcome-title">
+            Ask anything about<br />
+            <span class="gradient-text">your documents</span>
+          </h1>
+          <p class="welcome-subtitle">
+            Upload PDFs, Word docs, or images. Ragnify extracts text, crawls hyperlinks,
+            and answers your questions with zero hallucination — powered by Gemini and FAISS vector search.
+          </p>
+          <div class="welcome-features">
+            <div class="feature-card">
+              <div class="feature-icon" aria-hidden="true">🔍</div>
+              <div>
+                <strong>Vector Search</strong>
+                <span>FAISS semantic retrieval</span>
+              </div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon" aria-hidden="true">🌐</div>
+              <div>
+                <strong>Link Crawling</strong>
+                <span>Follows hyperlinks in docs</span>
+              </div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon" aria-hidden="true">🛡️</div>
+              <div>
+                <strong>Zero Hallucination</strong>
+                <span>Strictly grounded answers</span>
+              </div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon" aria-hidden="true">⚡</div>
+              <div>
+                <strong>Instant Answers</strong>
+                <span>Real-time streaming</span>
+              </div>
+            </div>
+          </div>
+          <button class="welcome-cta" id="welcomeUploadBtn" aria-label="Upload your first document">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload Your First Document
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Screen -->
+      <div class="chat-screen" id="chatScreen" style="display:none">
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div class="chat-doc-info">
+            <div class="chat-doc-icon" aria-hidden="true" id="chatDocIcon">📄</div>
+            <div class="chat-doc-details">
+              <h2 class="chat-doc-name" id="chatDocName">Document</h2>
+              <div class="chat-doc-meta" id="chatDocMeta">Ready</div>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <button class="header-btn" id="clearChatBtn" title="Clear chat" aria-label="Clear chat history">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </button>
+            <button class="header-btn new-doc-btn" id="newDocBtn" aria-label="Upload new document">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              New Document
+            </button>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-container" id="messagesContainer" role="log" aria-label="Chat messages" aria-live="polite">
+          <div class="messages-inner" id="messagesInner">
+            <!-- Messages rendered here by JS -->
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+          <!-- Source Citations Panel -->
+          <div class="sources-panel" id="sourcesPanel" style="display:none" role="region" aria-label="Source citations">
+            <span class="sources-label">Sources:</span>
+            <div class="sources-list" id="sourcesList"></div>
+          </div>
+
+          <!-- Suggested Questions -->
+          <div class="suggestions" id="suggestions">
+            <button class="suggestion-chip" onclick="useSuggestion(this)">What is the main topic of this document?</button>
+            <button class="suggestion-chip" onclick="useSuggestion(this)">Summarize the key points</button>
+            <button class="suggestion-chip" onclick="useSuggestion(this)">What are the financial figures mentioned?</button>
+            <button class="suggestion-chip" onclick="useSuggestion(this)">List all dates and deadlines</button>
+          </div>
+
+          <div class="input-row">
+            <div class="input-wrapper">
+              <textarea
+                id="questionInput"
+                placeholder="Ask anything about this document..."
+                rows="1"
+                aria-label="Question input"
+                maxlength="2000"
+              ></textarea>
+            </div>
+            <button class="send-btn" id="sendBtn" disabled aria-label="Send question">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          <p class="input-disclaimer">Ragnify answers strictly from your uploaded document and its linked sources.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Processing Overlay -->
+  <div class="processing-overlay" id="processingOverlay" style="display:none" role="dialog" aria-label="Processing document" aria-modal="true">
+    <div class="processing-card">
+      <div class="processing-spinner" aria-hidden="true">
+        <div class="spinner-ring"></div>
+        <div class="spinner-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+      </div>
+      <h3 class="processing-title" id="processingTitle">Processing Document</h3>
+      <p class="processing-msg" id="processingMsg">Initializing...</p>
+
+      <!-- Progress Bar -->
+      <div class="processing-progress-wrapper">
+        <div class="processing-progress-info">
+          <span id="processingPct">0%</span>
+          <span id="processingElapsed">0s elapsed</span>
+        </div>
+        <div class="processing-progress-track">
+          <div class="processing-progress-fill" id="processingProgressBar"></div>
+        </div>
+      </div>
+
+      <div class="processing-steps" id="processingSteps">
+        <div class="step" id="step-parsing">
+          <div class="step-icon">📄</div>
+          <div class="step-text">Parse Document</div>
+          <div class="step-status pending" aria-label="Pending"></div>
+        </div>
+        <div class="step" id="step-crawling">
+          <div class="step-icon">🌐</div>
+          <div class="step-text">Crawl Hyperlinks</div>
+          <div class="step-status pending" aria-label="Pending"></div>
+        </div>
+        <div class="step" id="step-embedding">
+          <div class="step-icon">🧠</div>
+          <div class="step-text">Generate Embeddings</div>
+          <div class="step-status pending" aria-label="Pending"></div>
+        </div>
+        <div class="step" id="step-indexing">
+          <div class="step-icon">🔍</div>
+          <div class="step-text">Build FAISS Index</div>
+          <div class="step-status pending" aria-label="Pending"></div>
+        </div>
+      </div>
+      <p class="processing-hint">Large documents with many hyperlinks may take 30-60 seconds.</p>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toastContainer" aria-live="assertive" role="alert"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
