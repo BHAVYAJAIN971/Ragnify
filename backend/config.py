@@ -41,14 +41,31 @@ CRAWL_TIMEOUT     = 15      # Seconds per URL request (increased from 10 for slo
 MAX_CRAWL_WORKERS = 10      # Concurrent crawl workers (increased from 8)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-# Prefer environment variables (set by render.yaml for Render deployment).
-# Falls back to local directory layout for development.
+# Prefer environment variables (set by render.yaml for Render deployment with disk).
+# Falls back to local directory layout for free tier / development.
 BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR    = os.environ.get("DATA_DIR",   os.path.join(BASE_DIR, "data", "indexes"))
-UPLOAD_DIR  = os.environ.get("UPLOAD_DIR", os.path.join(BASE_DIR, "uploads"))
+_default_data   = os.path.join(BASE_DIR, "data", "indexes")
+_default_upload = os.path.join(BASE_DIR, "uploads")
 
-os.makedirs(DATA_DIR,   exist_ok=True)
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+DATA_DIR    = os.environ.get("DATA_DIR",   _default_data)
+UPLOAD_DIR  = os.environ.get("UPLOAD_DIR", _default_upload)
+
+# If the configured path is not writable (e.g. /data on free tier without disk),
+# fall back to the local path inside the repo which is always writable.
+def _ensure_dir(path: str, fallback: str) -> str:
+    try:
+        os.makedirs(path, exist_ok=True)
+        # Quick write-test
+        test = os.path.join(path, ".writetest")
+        open(test, "w").close()
+        os.remove(test)
+        return path
+    except (OSError, PermissionError):
+        os.makedirs(fallback, exist_ok=True)
+        return fallback
+
+DATA_DIR   = _ensure_dir(DATA_DIR,   _default_data)
+UPLOAD_DIR = _ensure_dir(UPLOAD_DIR, _default_upload)
 
 # ── Anti-hallucination system prompt ──────────────────────────────────────────
 SYSTEM_PROMPT = """You are Ragnify — an elite, highly precise document intelligence assistant for professionals across banking, government, enterprise, and all industries.
